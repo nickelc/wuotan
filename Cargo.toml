@@ -1,0 +1,17 @@
+[package]
+name = "wuotan"
+version = "0.1.0"
+description = "Flash tool for Samsung devices"
+license = "GPL-3.0"
+authors = ["Constantin Nickel <constantin.nickel@gmail.com>"]
+keywords = ["samsung", "flash", "tool", "odin"]
+edition = "2018"
+include = ["src/**/*", "LICENSE", "README.md"]
+
+[dependencies]
+bitflags = "1.2"
+byteorder = "1.2"
+clap = "2.33"
+rusb = "0.8"
+tracing = "0.1"
+tracing-subscriber = "0.2"
