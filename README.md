@@ -1,5 +1,9 @@
 # woutan
 
+## Tested with
+
+- Samsung Galaxy S3 Neo (GT-I9301I)
+
 ## Installation
 
 ```
@@ -99,4 +103,30 @@ Flash Name: mx.pit
 FOTA Name:
 
 ...
+```
+
+### Flash partitions
+```
+$ wuotan help flash
+wuotan-flash
+flash partitions to a connected device
+
+USAGE:
+    wuotan flash [FLAGS] --partition <NAME> <FILE>
+
+FLAGS:
+    -h, --help      Prints help information
+        --reboot    reboot device after upload
+
+OPTIONS:
+    -p, --partition <NAME> <FILE>    partition name and file
+```
+
+#### Example: Flashing CF-Auto-Root
+```
+$ woutan flash --partition recovery recovery.img --partition cache cache.img.ext4
+Uploading RECOVERY
+RECOVERY upload successful
+Uploading CACHE
+CACHE upload successful
 ```

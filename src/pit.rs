@@ -1,5 +1,6 @@
 use std::fmt;
 use std::io;
+use std::ops::Deref;
 
 use byteorder::{ReadBytesExt, LE};
 
@@ -201,6 +202,15 @@ impl Entry {
 }
 
 pub struct Name([u8; 32]);
+
+impl Deref for Name {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        let pos = self.0.iter().position(|c| *c == 0).unwrap_or(32);
+        &self.0[0..pos]
+    }
+}
 
 impl fmt::Debug for Name {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
