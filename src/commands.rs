@@ -4,7 +4,7 @@ mod detect;
 mod flash;
 mod pit;
 
-use crate::error::CliResult;
+use crate::error::{CliResult, Error};
 
 pub type App = clap::App<'static, 'static>;
 

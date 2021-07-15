@@ -1,11 +1,12 @@
 use std::fs::File;
-use std::io::{BufReader, Cursor};
+use std::io::{BufReader, Cursor, Write};
+use std::path::PathBuf;
 use std::time::Duration;
 
 use clap::{AppSettings, ArgMatches};
 
-use super::{App, CliResult};
-use crate::device;
+use super::{App, CliResult, Error};
+use crate::device::{self, Handle};
 use crate::pit::Pit;
 use crate::proto;
 
@@ -18,13 +19,45 @@ pub fn cli() -> App {
                 .about("print the contents of the PIT from a connected device or a PIT file")
                 .arg_from_usage("[file] -f <FILE>, --file 'read local PIT file'"),
         )
+        .subcommand(
+            App::new("download")
+                .about("save the PIT from a connected device to a specific file")
+                .arg_from_usage("<output> <OUTPUT> 'path to the output file'"),
+        )
 }
 
 pub fn exec(args: &ArgMatches<'_>) -> CliResult {
     match args.subcommand() {
+        ("download", Some(args)) => download(args),
         ("print", Some(args)) => print(args),
         _ => unreachable!(),
     }
+}
+
+fn download(args: &ArgMatches<'_>) -> CliResult {
+    let output = args.value_of_os("output").expect("argument is required");
+    let output = PathBuf::from(output);
+
+    if output.exists() {
+        return Err("output file already exists".into());
+    }
+
+    let devices = device::detect(Duration::from_secs(1))?;
+    if let Some(device) = devices.iter().next() {
+        let mut handle = device.open(Duration::from_secs(3))?;
+        handle.claim().ok();
+        handle.reset().ok();
+
+        let pit = download_pit(&handle)?;
+
+        handle.release().ok();
+
+        let mut output = File::create(output)?;
+        output.write_all(&pit)?;
+
+        println!("PIT download successful");
+    }
+    Ok(())
 }
 
 fn print(args: &ArgMatches<'_>) -> CliResult {
@@ -40,21 +73,26 @@ fn print(args: &ArgMatches<'_>) -> CliResult {
             handle.claim().ok();
             handle.reset().ok();
 
-            proto::handshake(&handle)?;
+            let pit = download_pit(&handle)?;
 
-            proto::begin_session(&handle)?;
+            handle.release().ok();
 
-            let pit = proto::receive_pit(&handle)?;
             let mut buf = Cursor::new(pit);
             let pit = Pit::from_read(&mut buf)?;
             print_pit(&pit);
-
-            proto::end_session(&handle)?;
-
-            handle.release().ok();
         }
     }
     Ok(())
+}
+
+fn download_pit(handle: &Handle) -> Result<Vec<u8>, Error> {
+    proto::handshake(handle)?;
+    proto::begin_session(handle)?;
+
+    let data = proto::receive_pit(handle)?;
+
+    proto::end_session(handle)?;
+    Ok(data)
 }
 
 fn print_pit(pit: &Pit) {
