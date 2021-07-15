@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{BufReader, Cursor};
 use std::time::Duration;
 
-use clap::ArgMatches;
+use clap::{AppSettings, ArgMatches};
 
 use super::{App, CliResult};
 use crate::device;
@@ -10,12 +10,24 @@ use crate::pit::Pit;
 use crate::proto;
 
 pub fn cli() -> App {
-    App::new("print-pit")
-        .about("print the contents of the PIT from a connected device or a PIT file")
-        .arg_from_usage("[file] -f <FILE>, --file 'read local PIT file'")
+    App::new("pit")
+        .setting(AppSettings::VersionlessSubcommands)
+        .setting(AppSettings::SubcommandRequiredElseHelp)
+        .subcommand(
+            App::new("print")
+                .about("print the contents of the PIT from a connected device or a PIT file")
+                .arg_from_usage("[file] -f <FILE>, --file 'read local PIT file'"),
+        )
 }
 
 pub fn exec(args: &ArgMatches<'_>) -> CliResult {
+    match args.subcommand() {
+        ("print", Some(args)) => print(args),
+        _ => unreachable!(),
+    }
+}
+
+fn print(args: &ArgMatches<'_>) -> CliResult {
     if args.is_present("file") {
         let input = args.value_of_os("file").unwrap();
         let mut input = BufReader::new(File::open(input)?);

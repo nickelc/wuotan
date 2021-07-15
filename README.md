@@ -33,12 +33,12 @@ Bus 003 Device 014: ID 04e8:685d
 
 ### Print PIT from connected Samsung device
 ```
-$ woutan help print-pit
-wuotan-print-pit 
+$ woutan help pit print
+wuotan-pit-print
 print the contents of the PIT from a connected device or a PIT file
 
 USAGE:
-    wuotan print-pit [OPTIONS]
+    wuotan pit print [OPTIONS]
 
 FLAGS:
     -h, --help    Prints help information
@@ -49,7 +49,7 @@ OPTIONS:
 
 #### Example
 ```
-$ woutan print-pit -f s3pit.dat
+$ woutan pit print -f s3pit.dat
 Entry Count: 16
 Unknown 1: 1598902083
 Unknown 2: 844251476

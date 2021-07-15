@@ -15,7 +15,7 @@ pub fn cli() -> Vec<App> {
 pub fn get(cmd: &str) -> Option<fn(&ArgMatches<'_>) -> CliResult> {
     let func = match cmd {
         "detect" => detect::exec,
-        "print-pit" => pit::exec,
+        "pit" => pit::exec,
         "flash" => flash::exec,
         _ => return None,
     };
