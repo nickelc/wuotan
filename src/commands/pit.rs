@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use clap::{AppSettings, ArgMatches};
 
-use super::{App, CliResult, Error};
+use super::{App, ArgMatchesExt, CliResult, Error};
 use crate::device::{self, Handle};
 use crate::pit::Pit;
 use crate::proto;
@@ -35,6 +35,7 @@ pub fn exec(args: &ArgMatches<'_>) -> CliResult {
 }
 
 fn download(args: &ArgMatches<'_>) -> CliResult {
+    let log_level = args.usb_log_level();
     let output = args.value_of_os("output").expect("argument is required");
     let output = PathBuf::from(output);
 
@@ -42,7 +43,7 @@ fn download(args: &ArgMatches<'_>) -> CliResult {
         return Err("output file already exists".into());
     }
 
-    let devices = device::detect(Duration::from_secs(1))?;
+    let devices = device::detect(log_level)?;
     if let Some(device) = devices.iter().next() {
         let mut handle = device.open(Duration::from_secs(3))?;
         handle.claim().ok();
@@ -67,7 +68,8 @@ fn print(args: &ArgMatches<'_>) -> CliResult {
         let pit = Pit::from_read(&mut input)?;
         print_pit(&pit);
     } else {
-        let devices = device::detect(Duration::from_secs(1))?;
+        let log_level = args.usb_log_level();
+        let devices = device::detect(log_level)?;
         if let Some(device) = devices.iter().next() {
             let mut handle = device.open(Duration::from_secs(3))?;
             handle.claim().ok();

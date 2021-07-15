@@ -1,16 +1,15 @@
-use std::time::Duration;
-
 use clap::ArgMatches;
 
-use super::{App, CliResult};
+use super::{App, ArgMatchesExt, CliResult};
 use crate::device;
 
 pub fn cli() -> App {
     App::new("detect").about("list connected Samsung devices")
 }
 
-pub fn exec(_args: &ArgMatches<'_>) -> CliResult {
-    for device in device::detect(Duration::from_secs(1))? {
+pub fn exec(args: &ArgMatches<'_>) -> CliResult {
+    let log_level = args.usb_log_level();
+    for device in device::detect(log_level)? {
         let (vendor_id, product_id) = device.id()?;
         println!(
             "Bus {:03} Device {:03}: ID {:04x}:{:04x}",

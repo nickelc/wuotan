@@ -131,8 +131,12 @@ impl io::Write for Handle {
     }
 }
 
-pub fn detect(_timeout: Duration) -> Result<Devices, Error> {
-    let list = rusb::Context::new()?.devices()?;
+pub fn detect(log_level: Option<rusb::LogLevel>) -> Result<Devices, Error> {
+    let mut context = rusb::Context::new()?;
+    if let Some(level) = log_level {
+        context.set_log_level(level);
+    }
+    let list = context.devices()?;
 
     let mut devices = vec![];
     for device in list.iter() {

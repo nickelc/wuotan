@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use clap::ArgMatches;
 
-use super::{App, CliResult};
+use super::{App, ArgMatchesExt, CliResult};
 use crate::device;
 use crate::pit::{self, Pit};
 use crate::proto;
@@ -30,7 +30,8 @@ pub fn exec(args: &ArgMatches<'_>) -> CliResult {
         .map(|(name, file)| open_file_image(file).map(|f| (name, f)))
         .try_fold((Vec::new(), 0), fold_values)?;
 
-    let devices = device::detect(Duration::from_secs(1))?;
+    let log_level = args.usb_log_level();
+    let devices = device::detect(log_level)?;
     if let Some(device) = devices.iter().next() {
         let mut handle = device.open(Duration::from_secs(15))?;
         handle.claim().ok();

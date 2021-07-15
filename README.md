@@ -23,6 +23,9 @@ USAGE:
 
 FLAGS:
     -h, --help    Prints help information
+
+OPTIONS:
+        --usb-log-level <LEVEL>    set the libusb log level [possible values: error, warn, info, debug]
 ```
 
 #### Example
@@ -44,7 +47,8 @@ FLAGS:
     -h, --help    Prints help information
 
 OPTIONS:
-    -f, --file <FILE>    read local PIT file
+    -f, --file <FILE>              read local PIT file
+        --usb-log-level <LEVEL>    set the libusb log level [possible values: error, warn, info, debug]
 ```
 
 #### Example
@@ -120,6 +124,7 @@ FLAGS:
 
 OPTIONS:
     -p, --partition <NAME> <FILE>    partition name and file
+        --usb-log-level <LEVEL>      set the libusb log level [possible values: error, warn, info, debug]
 ```
 
 #### Example: Flashing CF-Auto-Root

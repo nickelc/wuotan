@@ -9,6 +9,7 @@ mod error;
 mod pit;
 mod proto;
 
+use commands::AppExt;
 use error::CliResult;
 
 fn main() -> CliResult {
@@ -19,6 +20,7 @@ fn main() -> CliResult {
         .version(crate_version!())
         .setting(AppSettings::VersionlessSubcommands)
         .setting(AppSettings::ArgRequiredElseHelp)
+        .arg_usb_log_level()
         .subcommands(commands::cli());
 
     match app.get_matches().subcommand() {
