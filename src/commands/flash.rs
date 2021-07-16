@@ -32,8 +32,8 @@ pub fn exec(args: &ArgMatches<'_>) -> CliResult {
 
     if let Some(device) = args.selected_device()? {
         let mut handle = device.open(Duration::from_secs(15))?;
-        handle.claim().ok();
-        handle.reset().ok();
+        handle.claim()?;
+        handle.reset()?;
 
         proto::handshake(&handle)?;
 
@@ -93,7 +93,7 @@ pub fn exec(args: &ArgMatches<'_>) -> CliResult {
             proto::reboot(&handle)?;
         }
 
-        handle.release().ok();
+        handle.release()?;
     }
     Ok(())
 }

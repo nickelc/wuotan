@@ -46,12 +46,12 @@ fn download(args: &ArgMatches<'_>) -> CliResult {
 
     if let Some(device) = args.selected_device()? {
         let mut handle = device.open(Duration::from_secs(3))?;
-        handle.claim().ok();
-        handle.reset().ok();
+        handle.claim()?;
+        handle.reset()?;
 
         let pit = download_pit(&handle)?;
 
-        handle.release().ok();
+        handle.release()?;
 
         let mut output = File::create(output)?;
         output.write_all(&pit)?;
@@ -70,12 +70,12 @@ fn print(args: &ArgMatches<'_>) -> CliResult {
     } else {
         if let Some(device) = args.selected_device()? {
             let mut handle = device.open(Duration::from_secs(3))?;
-            handle.claim().ok();
-            handle.reset().ok();
+            handle.claim()?;
+            handle.reset()?;
 
             let pit = download_pit(&handle)?;
 
-            handle.release().ok();
+            handle.release()?;
 
             let mut buf = Cursor::new(pit);
             let pit = Pit::from_read(&mut buf)?;
