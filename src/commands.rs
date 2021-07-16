@@ -4,6 +4,7 @@ mod detect;
 mod flash;
 mod pit;
 
+use crate::device::{self, Device};
 use crate::error::{CliResult, Error};
 
 pub type App = clap::App<'static, 'static>;
@@ -24,6 +25,8 @@ pub fn get(cmd: &str) -> Option<fn(&ArgMatches<'_>) -> CliResult> {
 
 pub trait AppExt {
     fn arg_usb_log_level(self) -> App;
+
+    fn arg_select_device(self) -> App;
 }
 
 impl AppExt for App {
@@ -38,10 +41,31 @@ impl AppExt for App {
                 .possible_values(&["error", "warn", "info", "debug"]),
         )
     }
+
+    fn arg_select_device(self) -> App {
+        self.arg(
+            Arg::from_usage("[device] -d <DEVICE>, --device")
+                .help(r#"select a device via bus number and its address (ex: "003:068", "3:68")"#)
+                .validator(|s| match s.split_once(':') {
+                    Some((bus_number, address)) => {
+                        bus_number
+                            .parse::<u8>()
+                            .map_err(|_| String::from("invalid bus number"))?;
+                        address
+                            .parse::<u8>()
+                            .map_err(|_| String::from("invalid device address"))?;
+                        Ok(())
+                    }
+                    _ => Err(r#"invalid device selector. expected: "XXX:XXX""#.into()),
+                }),
+        )
+    }
 }
 
 pub trait ArgMatchesExt {
     fn usb_log_level(&self) -> Option<rusb::LogLevel>;
+
+    fn selected_device(&self) -> Result<Option<Device>, Error>;
 }
 
 impl ArgMatchesExt for ArgMatches<'_> {
@@ -54,5 +78,22 @@ impl ArgMatchesExt for ArgMatches<'_> {
             _ => return None,
         };
         Some(level)
+    }
+
+    fn selected_device(&self) -> Result<Option<Device>, Error> {
+        let level = self.usb_log_level();
+        let mut it = device::detect(level)?.into_iter();
+
+        let device = match self.value_of("device").and_then(|s| s.split_once(':')) {
+            Some((bus_number, address)) => {
+                let bus_number = bus_number.parse::<u8>()?;
+                let address = address.parse::<u8>()?;
+                it.filter(|d| d.bus_number() == bus_number && d.address() == address)
+                    .next()
+            }
+            None => it.next(),
+        };
+
+        Ok(device)
     }
 }

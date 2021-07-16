@@ -1,4 +1,4 @@
-use std::{io, slice::Iter, time::Duration, vec::IntoIter};
+use std::{io, time::Duration, vec::IntoIter};
 
 use rusb::constants::LIBUSB_CLASS_DATA;
 use rusb::{Error, UsbContext};
@@ -8,12 +8,6 @@ const PRODUCT_IDS: [u16; 3] = [0x6601, 0x685D, 0x68C3];
 
 #[derive(Debug)]
 pub struct Devices(Vec<Device>);
-
-impl Devices {
-    pub fn iter(&self) -> Iter<Device> {
-        self.0.iter()
-    }
-}
 
 impl IntoIterator for Devices {
     type Item = Device;

@@ -5,8 +5,8 @@ use std::time::Duration;
 
 use clap::{AppSettings, ArgMatches};
 
-use super::{App, ArgMatchesExt, CliResult, Error};
-use crate::device::{self, Handle};
+use super::{App, AppExt, ArgMatchesExt, CliResult, Error};
+use crate::device::Handle;
 use crate::pit::Pit;
 use crate::proto;
 
@@ -17,12 +17,14 @@ pub fn cli() -> App {
         .subcommand(
             App::new("print")
                 .about("print the contents of the PIT from a connected device or a PIT file")
-                .arg_from_usage("[file] -f <FILE>, --file 'read local PIT file'"),
+                .arg_from_usage("[file] -f <FILE>, --file 'read local PIT file'")
+                .arg_select_device(),
         )
         .subcommand(
             App::new("download")
                 .about("save the PIT from a connected device to a specific file")
-                .arg_from_usage("<output> <OUTPUT> 'path to the output file'"),
+                .arg_from_usage("<output> <OUTPUT> 'path to the output file'")
+                .arg_select_device(),
         )
 }
 
@@ -35,7 +37,6 @@ pub fn exec(args: &ArgMatches<'_>) -> CliResult {
 }
 
 fn download(args: &ArgMatches<'_>) -> CliResult {
-    let log_level = args.usb_log_level();
     let output = args.value_of_os("output").expect("argument is required");
     let output = PathBuf::from(output);
 
@@ -43,8 +44,7 @@ fn download(args: &ArgMatches<'_>) -> CliResult {
         return Err("output file already exists".into());
     }
 
-    let devices = device::detect(log_level)?;
-    if let Some(device) = devices.iter().next() {
+    if let Some(device) = args.selected_device()? {
         let mut handle = device.open(Duration::from_secs(3))?;
         handle.claim().ok();
         handle.reset().ok();
@@ -68,9 +68,7 @@ fn print(args: &ArgMatches<'_>) -> CliResult {
         let pit = Pit::from_read(&mut input)?;
         print_pit(&pit);
     } else {
-        let log_level = args.usb_log_level();
-        let devices = device::detect(log_level)?;
-        if let Some(device) = devices.iter().next() {
+        if let Some(device) = args.selected_device()? {
             let mut handle = device.open(Duration::from_secs(3))?;
             handle.claim().ok();
             handle.reset().ok();

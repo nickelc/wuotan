@@ -47,6 +47,7 @@ FLAGS:
     -h, --help    Prints help information
 
 OPTIONS:
+    -d, --device <DEVICE>          select a device via bus number and its address (ex: "003:068", "3:68")
     -f, --file <FILE>              read local PIT file
         --usb-log-level <LEVEL>    set the libusb log level [possible values: error, warn, info, debug]
 ```
@@ -123,6 +124,7 @@ FLAGS:
         --reboot    reboot device after upload
 
 OPTIONS:
+    -d, --device <DEVICE>            select a device via bus number and its address (ex: "003:068", "3:68")
     -p, --partition <NAME> <FILE>    partition name and file
         --usb-log-level <LEVEL>      set the libusb log level [possible values: error, warn, info, debug]
 ```

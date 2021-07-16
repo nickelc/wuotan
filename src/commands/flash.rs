@@ -4,8 +4,7 @@ use std::time::Duration;
 
 use clap::ArgMatches;
 
-use super::{App, ArgMatchesExt, CliResult};
-use crate::device;
+use super::{App, AppExt, ArgMatchesExt, CliResult};
 use crate::pit::{self, Pit};
 use crate::proto;
 
@@ -14,6 +13,7 @@ pub fn cli() -> App {
         .about("flash partitions to a connected device")
         .arg_from_usage("<part> -p <NAME> <FILE>..., --partition 'partition name and file'")
         .arg_from_usage("--reboot 'reboot device after upload'")
+        .arg_select_device()
 }
 
 pub fn exec(args: &ArgMatches<'_>) -> CliResult {
@@ -30,9 +30,7 @@ pub fn exec(args: &ArgMatches<'_>) -> CliResult {
         .map(|(name, file)| open_file_image(file).map(|f| (name, f)))
         .try_fold((Vec::new(), 0), fold_values)?;
 
-    let log_level = args.usb_log_level();
-    let devices = device::detect(log_level)?;
-    if let Some(device) = devices.iter().next() {
+    if let Some(device) = args.selected_device()? {
         let mut handle = device.open(Duration::from_secs(15))?;
         handle.claim().ok();
         handle.reset().ok();
