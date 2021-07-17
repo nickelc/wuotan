@@ -3,6 +3,7 @@ use clap::{Arg, ArgMatches};
 mod detect;
 mod flash;
 mod pit;
+mod reboot;
 
 use crate::device::{self, Device};
 use crate::error::{CliResult, Error};
@@ -10,7 +11,7 @@ use crate::error::{CliResult, Error};
 pub type App = clap::App<'static, 'static>;
 
 pub fn cli() -> Vec<App> {
-    vec![detect::cli(), pit::cli(), flash::cli()]
+    vec![detect::cli(), pit::cli(), flash::cli(), reboot::cli()]
 }
 
 pub fn get(cmd: &str) -> Option<fn(&ArgMatches<'_>) -> CliResult> {
@@ -18,6 +19,7 @@ pub fn get(cmd: &str) -> Option<fn(&ArgMatches<'_>) -> CliResult> {
         "detect" => detect::exec,
         "pit" => pit::exec,
         "flash" => flash::exec,
+        "reboot" => reboot::exec,
         _ => return None,
     };
     Some(func)
