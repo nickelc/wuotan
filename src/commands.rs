@@ -90,8 +90,7 @@ impl ArgMatchesExt for ArgMatches<'_> {
             Some((bus_number, address)) => {
                 let bus_number = bus_number.parse::<u8>()?;
                 let address = address.parse::<u8>()?;
-                it.filter(|d| d.bus_number() == bus_number && d.address() == address)
-                    .next()
+                it.find(|d| d.bus_number() == bus_number && d.address() == address)
             }
             None => it.next(),
         };

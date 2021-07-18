@@ -67,20 +67,18 @@ fn print(args: &ArgMatches<'_>) -> CliResult {
         let mut input = BufReader::new(File::open(input)?);
         let pit = Pit::from_read(&mut input)?;
         print_pit(&pit);
-    } else {
-        if let Some(device) = args.selected_device()? {
-            let mut handle = device.open(Duration::from_secs(3))?;
-            handle.claim()?;
-            handle.reset()?;
+    } else if let Some(device) = args.selected_device()? {
+        let mut handle = device.open(Duration::from_secs(3))?;
+        handle.claim()?;
+        handle.reset()?;
 
-            let pit = download_pit(&handle)?;
+        let pit = download_pit(&handle)?;
 
-            handle.release()?;
+        handle.release()?;
 
-            let mut buf = Cursor::new(pit);
-            let pit = Pit::from_read(&mut buf)?;
-            print_pit(&pit);
-        }
+        let mut buf = Cursor::new(pit);
+        let pit = Pit::from_read(&mut buf)?;
+        print_pit(&pit);
     }
     Ok(())
 }
