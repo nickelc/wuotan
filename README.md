@@ -1,4 +1,4 @@
-# woutan
+# wuotan
 
 ## Tested with
 
@@ -7,14 +7,14 @@
 ## Installation
 
 ```
-$ cargo install https://github.com/nickelc/woutan.git
+$ cargo install https://github.com/nickelc/wuotan.git
 ```
 
 ## Usage
 
 ### List connected Samsung devices
 ```
-$ woutan help detect
+$ wuotan help detect
 wuotan-detect 
 list connected Samsung devices
 
@@ -30,13 +30,13 @@ OPTIONS:
 
 #### Example
 ```
-$ woutan detect
+$ wuotan detect
 Bus 003 Device 014: ID 04e8:685d
 ```
 
 ### Print PIT from connected Samsung device
 ```
-$ woutan help pit print
+$ wuotan help pit print
 wuotan-pit-print
 print the contents of the PIT from a connected device or a PIT file
 
@@ -54,7 +54,7 @@ OPTIONS:
 
 #### Example
 ```
-$ woutan pit print -f s3pit.dat
+$ wuotan pit print -f s3pit.dat
 Entry Count: 16
 Unknown 1: 1598902083
 Unknown 2: 844251476
@@ -131,7 +131,7 @@ OPTIONS:
 
 #### Example: Flashing CF-Auto-Root
 ```
-$ woutan flash --partition recovery recovery.img --partition cache cache.img.ext4
+$ wuotan flash --partition recovery recovery.img --partition cache cache.img.ext4
 Uploading RECOVERY
 RECOVERY upload successful
 Uploading CACHE
