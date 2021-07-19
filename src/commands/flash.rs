@@ -112,10 +112,7 @@ fn open_file_image(name: &str) -> Result<(BufReader<File>, u64), FlashError> {
 }
 
 fn chunked<T: Iterator>(mut iter: T) -> impl Iterator<Item = (T::Item, T::Item)> {
-    std::iter::from_fn(move || match (iter.next(), iter.next()) {
-        (Some(a), Some(b)) => Some((a, b)),
-        _ => None,
-    })
+    std::iter::from_fn(move || iter.next().zip(iter.next()))
 }
 
 use std::fmt;
