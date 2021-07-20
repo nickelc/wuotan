@@ -119,8 +119,9 @@ USAGE:
     wuotan flash [FLAGS] [OPTIONS] <--tar <FILE>...|--partition <NAME> <FILE>>
 
 FLAGS:
-    -h, --help      Prints help information
-        --reboot    reboot device after upload
+    -h, --help         Prints help information
+        --no-verify    don't verify the checksum of tar files
+        --reboot       reboot device after upload
 
 OPTIONS:
     -d, --device <DEVICE>            select a device via bus number and its address (ex: "003:068", "3:68")

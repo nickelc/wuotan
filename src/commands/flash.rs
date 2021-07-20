@@ -1,9 +1,10 @@
 use std::fs::File;
-use std::io::{BufReader, Cursor, Read, Seek, SeekFrom};
+use std::io::{self, BufReader, Cursor, Read, Seek, SeekFrom};
 use std::path::Path;
 use std::time::Duration;
 
 use clap::{Arg, ArgGroup, ArgMatches};
+use md5::{Digest, Md5};
 
 use super::{App, AppExt, ArgMatchesExt, CliResult, Error};
 use crate::pit::{BinaryType, Entry, Pit};
@@ -34,6 +35,7 @@ pub fn cli() -> App {
                 .required(true)
                 .args(&["tar", "part"]),
         )
+        .arg_from_usage("--no-verify 'don't verify the checksum of tar files'")
         .arg_from_usage("--reboot 'reboot device after upload'")
         .arg_select_device()
 }
@@ -168,9 +170,50 @@ fn get_arguments<'a>(args: &'a ArgMatches<'_>) -> Result<Vec<FileArgument<'a>>, 
             let err = FlashError::InvalidFile(fs.file().display().to_string());
             return Err(err.into());
         }
+        if args.is_present("no-verify") {
+            continue;
+        }
+        if let FileArgument::Tar { file } = fs {
+            if file.extension().map(|ext| ext == "md5").unwrap_or_default() {
+                println!(
+                    "Verifying tar checksum: {}",
+                    file.file_name().map(|n| n.to_string_lossy()).unwrap()
+                );
+                if !verify_tar_checksum(file)? {
+                    let err = FlashError::InvalidChecksum(fs.file().display().to_string());
+                    return Err(err.into());
+                }
+            }
+        }
     }
 
     Ok(files.into_iter().map(|(_, fs)| fs).collect())
+}
+
+fn verify_tar_checksum(file: &Path) -> Result<bool, io::Error> {
+    let file_size = file.metadata()?.len();
+    // tar_size = file_size - (checksum(32) + space(2) + basename + newline)
+    let tar_size = file
+        .file_stem()
+        .map(|name| 32 + 2 + name.len() as u64 + 1)
+        .and_then(|checksum_len| file_size.checked_sub(checksum_len))
+        .unwrap_or_default();
+
+    let mut reader = BufReader::new(File::open(file)?);
+
+    let calculated = {
+        let mut tar = reader.by_ref().take(tar_size);
+        let mut digest = Md5::new();
+
+        io::copy(&mut tar, &mut digest)?;
+
+        format!("{:x}", digest.finalize())
+    };
+
+    let mut checksum = String::new();
+    reader.take(32).read_to_string(&mut checksum)?;
+
+    Ok(calculated.eq_ignore_ascii_case(&checksum))
 }
 
 enum MappedEntry<'a> {
@@ -229,6 +272,7 @@ use std::fmt;
 
 #[derive(Debug)]
 enum FlashError {
+    InvalidChecksum(String),
     InvalidFile(String),
     PartitionNotFound(String),
     FlashNameNotFound(String),
@@ -239,6 +283,7 @@ impl std::error::Error for FlashError {}
 impl fmt::Display for FlashError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            FlashError::InvalidChecksum(name) => write!(f, r#"invalid checksum: "{}""#, name),
             FlashError::InvalidFile(name) => write!(f, r#"invalid file: "{}""#, name),
             FlashError::PartitionNotFound(name) => write!(f, r#"partition not found: "{}""#, name),
             FlashError::FlashNameNotFound(name) => write!(f, r#"flash name not found: "{}""#, name),
