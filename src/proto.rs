@@ -109,11 +109,11 @@ pub fn setup_file_part_size(handle: &Handle, size: u32) -> Result<(), Error> {
 }
 
 #[instrument(skip(handle))]
-pub fn send_total_size(handle: &Handle, size: u32) -> Result<(), Error> {
+pub fn send_total_size(handle: &Handle, size: u64) -> Result<(), Error> {
     let mut buf = vec![0; 1024];
     buf[0..4].copy_from_slice(&CONTROL_TYPE_SESSION);
     buf[4..8].copy_from_slice(&SESSION_REQUEST_TYPE_TOTAL_BYTES);
-    buf[8..12].copy_from_slice(&size.to_le_bytes());
+    buf[8..16].copy_from_slice(&size.to_le_bytes());
 
     tracing::debug!("out: {:X?}", &buf[..16]);
     handle.write(&buf)?;

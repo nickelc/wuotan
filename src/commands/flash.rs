@@ -59,7 +59,7 @@ pub fn exec(args: &ArgMatches<'_>) -> CliResult {
 
         let (total_file_size, mapped_args) = map_arguments_with_pit(&files, &pit)?;
 
-        proto::send_total_size(&handle, total_file_size as u32)?;
+        proto::send_total_size(&handle, total_file_size)?;
 
         let target_for_entry = |entry: &Entry| match entry.binary_type {
             BinaryType::ApplicationProcessor => FileTarget::ApplicationProcessor {
