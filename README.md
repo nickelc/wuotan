@@ -113,11 +113,10 @@ FOTA Name:
 ### Flash partitions
 ```
 $ wuotan help flash
-wuotan-flash
 flash partitions to a connected device
 
 USAGE:
-    wuotan flash [FLAGS] --partition <NAME> <FILE>
+    wuotan flash [FLAGS] [OPTIONS] <--tar <FILE>...|--partition <NAME> <FILE>>
 
 FLAGS:
     -h, --help      Prints help information
@@ -125,7 +124,8 @@ FLAGS:
 
 OPTIONS:
     -d, --device <DEVICE>            select a device via bus number and its address (ex: "003:068", "3:68")
-    -p, --partition <NAME> <FILE>    partition name and file
+    -p, --partition <NAME> <FILE>    partition name and file image
+    -t, --tar <FILE>...              tar file containing the file images to be flashed
         --usb-log-level <LEVEL>      set the libusb log level [possible values: error, warn, info, debug]
 ```
 

@@ -13,5 +13,6 @@ bitflags = "1.2"
 byteorder = "1.2"
 clap = "2.33"
 rusb = "0.8"
+tar = { version = "0.4.35", default-features = false }
 tracing = "0.1"
 tracing-subscriber = "0.2"
