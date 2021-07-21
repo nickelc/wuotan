@@ -17,3 +17,6 @@ rusb = "0.8"
 tar = { version = "0.4.35", default-features = false }
 tracing = "0.1"
 tracing-subscriber = "0.2"
+
+[features]
+libusb-vendored = ["rusb/vendored"]
