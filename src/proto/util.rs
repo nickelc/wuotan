@@ -21,7 +21,11 @@ impl HandleExt for Handle {
     {
         let ret = f(self)?;
         tracing::trace!("read bulk with empty slice");
+
+        #[cfg(not(windows))]
         self.read(&mut [])?;
+        #[cfg(windows)]
+        self.read(&mut [0])?;
         Ok(ret)
     }
 
