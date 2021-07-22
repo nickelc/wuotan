@@ -1,29 +1,14 @@
 name: Release
 
 on:
-  release:
-    types: [published]
+  push:
 
 jobs:
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Install rust
-        uses: hecrj/setup-rust-action@v1
-
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Test
-        run: cargo test
-
   build:
     name: Build ${{ matrix.target }}
-    needs: [test]
 
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
         include:
@@ -38,6 +23,7 @@ jobs:
             bin: wuotan
 
     runs-on: ${{ matrix.os }}
+    continue-on-error: true
 
     steps:
       - name: Install rust
@@ -49,14 +35,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build
-        run: cargo build --release --target ${{ matrix.target }}
+        run: cargo build --release --locked --features libusb-vendored --target ${{ matrix.target }}
 
       - name: Strip release binary
-        if: runner.os == 'Linux' || runner.os == 'macOS'
         run: strip "target/${{ matrix.target }}/release/${{ matrix.bin }}"
 
-      - name: Package
-        id: package
+      - name: Prepare artifacts
+        id: artifacts
         shell: bash
         run: |
           version=${GITHUB_REF#refs/tags/}
@@ -69,35 +54,15 @@ jobs:
           if [ "${{ runner.os }}" = "Windows" ]; then
             7z a "$staging.zip" "$staging"
 
-            echo "(Get-FileHash \"$staging.zip\" -Algorithm SHA256).Hash | Out-File -Encoding ASCII -NoNewline \"$staging.zip.sha256\"" | pwsh -c -
-
-            echo "::set-output name=ASSET::$staging.zip"
-            echo "::set-output name=ASSET_CHK::$staging.zip.sha256"
+            echo "::set-output name=ARTIFACT::$staging.zip"
           else
             tar czf "$staging.tar.gz"  "$staging"
 
-            echo -n "$(shasum -ba 256 "$staging.tar.gz" | cut -d " " -f 1)" > "$staging.tar.gz.sha256"
-
-            echo "::set-output name=ASSET::$staging.tar.gz"
-            echo "::set-output name=ASSET_CHK::$staging.tar.gz.sha256"
+            echo "::set-output name=ARTIFACT::$staging.tar.gz"
           fi
 
-      - name: Upload package
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_name: ${{ steps.package.outputs.ASSET }}
-          asset_path: ${{ steps.package.outputs.ASSET }}
-          asset_content_type: application/octet-stream
-
-      - name: Upload package checksum
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_name: ${{ steps.package.outputs.ASSET_CHK }}
-          asset_path: ${{ steps.package.outputs.ASSET_CHK }}
-          asset_content_type: application/octet-stream
+          name: ${{ steps.artifacts.output.ARTIFACT }}
+          path: ${{ steps.artifacts.output.ARTIFACT }}
