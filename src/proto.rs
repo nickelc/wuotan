@@ -260,7 +260,7 @@ pub fn file_transfer<R: Read>(
     for batch in it {
         begin_batch_file_transfer(handle, batch.size())?;
         for n in batch.chunks() {
-            let mut buf = [0; 1024 * 1024];
+            let mut buf = vec![0; 1024 * 1024];
             util::fill_buf(file, &mut buf)?;
 
             handle.with_post_write_op(|handle| send_file_chunk(handle, n, &buf))?;
