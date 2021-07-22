@@ -64,5 +64,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ steps.artifacts.output.ARTIFACT }}
-          path: ${{ steps.artifacts.output.ARTIFACT }}
+          name: ${{ steps.artifacts.outputs.ARTIFACT }}
+          path: ${{ steps.artifacts.outputs.ARTIFACT }}
