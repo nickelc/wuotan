@@ -35,10 +35,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build
-        run: cargo build --release --locked --features libusb-vendored --target ${{ matrix.target }}
+        run: cargo build --locked --features libusb-vendored --target ${{ matrix.target }}
 
       - name: Strip release binary
-        run: strip "target/${{ matrix.target }}/release/${{ matrix.bin }}"
+        run: strip "target/${{ matrix.target }}/debug/${{ matrix.bin }}"
 
       - name: Prepare artifacts
         id: artifacts
