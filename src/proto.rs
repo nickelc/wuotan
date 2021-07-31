@@ -164,7 +164,7 @@ fn begin_batch_file_transfer(handle: &Handle, size: u32) -> Result<(), Error> {
 #[instrument(skip(handle, chunk))]
 fn send_file_chunk(handle: &Handle, chunk_idx: u32, chunk: &[u8]) -> Result<(), Error> {
     tracing::debug!("out: {:X?}", &chunk[..16]);
-    handle.write(&chunk)?;
+    handle.write(chunk)?;
 
     let mut buf = vec![0; 8];
     let n = handle.read(&mut buf)?;

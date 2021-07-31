@@ -109,6 +109,7 @@ impl fmt::Display for BinaryType {
 }
 
 #[derive(Debug)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum DeviceType {
     OneNAND,
     File,
