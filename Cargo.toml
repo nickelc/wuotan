@@ -16,7 +16,7 @@ md-5 = "0.10"
 rusb = "0.9"
 tar = { version = "0.4.35", default-features = false }
 tracing = "0.1"
-tracing-subscriber = "0.2"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 libusb-vendored = ["rusb/vendored"]
