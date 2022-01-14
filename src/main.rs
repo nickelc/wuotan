@@ -18,13 +18,12 @@ fn main() -> CliResult {
     let app = App::new(crate_name!())
         .about(crate_description!())
         .version(crate_version!())
-        .setting(AppSettings::VersionlessSubcommands)
         .setting(AppSettings::ArgRequiredElseHelp)
         .arg_usb_log_level()
         .subcommands(commands::cli());
 
     match app.get_matches().subcommand() {
-        (cmd, Some(args)) => {
+        Some((cmd, args)) => {
             if let Some(cmd) = commands::get(cmd) {
                 cmd(args)?;
             }

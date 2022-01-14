@@ -3,7 +3,7 @@ use std::io::{BufReader, Cursor, Write};
 use std::path::PathBuf;
 use std::time::Duration;
 
-use clap::{AppSettings, ArgMatches};
+use clap::{AppSettings, Arg, ArgMatches};
 
 use super::{App, AppExt, ArgMatchesExt, CliResult, Error};
 use crate::device::Handle;
@@ -12,31 +12,43 @@ use crate::proto;
 
 pub fn cli() -> App {
     App::new("pit")
-        .setting(AppSettings::VersionlessSubcommands)
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .subcommand(
             App::new("print")
                 .about("print the contents of the PIT from a connected device or a PIT file")
-                .arg_from_usage("[file] -f <FILE>, --file 'read local PIT file'")
+                .arg(
+                    Arg::new("file")
+                        .long("file")
+                        .short('f')
+                        .value_name("FILE")
+                        .allow_invalid_utf8(true)
+                        .help("read local PIT file"),
+                )
                 .arg_select_device(),
         )
         .subcommand(
             App::new("download")
                 .about("save the PIT from a connected device to a specific file")
-                .arg_from_usage("<output> <OUTPUT> 'path to the output file'")
+                .arg(
+                    Arg::new("output")
+                        .value_name("OUTPUT")
+                        .required(true)
+                        .allow_invalid_utf8(true)
+                        .help("path to the output file"),
+                )
                 .arg_select_device(),
         )
 }
 
-pub fn exec(args: &ArgMatches<'_>) -> CliResult {
+pub fn exec(args: &ArgMatches) -> CliResult {
     match args.subcommand() {
-        ("download", Some(args)) => download(args),
-        ("print", Some(args)) => print(args),
+        Some(("download", args)) => download(args),
+        Some(("print", args)) => print(args),
         _ => unreachable!(),
     }
 }
 
-fn download(args: &ArgMatches<'_>) -> CliResult {
+fn download(args: &ArgMatches) -> CliResult {
     let output = args.value_of_os("output").expect("argument is required");
     let output = PathBuf::from(output);
 
@@ -61,7 +73,7 @@ fn download(args: &ArgMatches<'_>) -> CliResult {
     Ok(())
 }
 
-fn print(args: &ArgMatches<'_>) -> CliResult {
+fn print(args: &ArgMatches) -> CliResult {
     if args.is_present("file") {
         let input = args.value_of_os("file").unwrap();
         let mut input = BufReader::new(File::open(input)?);

@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::fs::File;
 use std::io::{self, BufReader, Cursor, Read, Seek, SeekFrom};
 use std::path::Path;
@@ -14,33 +15,44 @@ pub fn cli() -> App {
     App::new("flash")
         .about("flash partitions to a connected device")
         .arg(
-            Arg::with_name("part")
+            Arg::new("part")
                 .help("partition name and file image")
                 .long("partition")
-                .short("p")
+                .short('p')
                 .value_names(&["NAME", "FILE"])
-                .multiple(true),
+                .allow_invalid_utf8(true)
+                .multiple_occurrences(true)
+                .multiple_values(true),
         )
         .arg(
-            Arg::with_name("tar")
+            Arg::new("tar")
                 .help("tar file containing the file images to be flashed")
                 .long("tar")
-                .short("t")
+                .short('t')
                 .value_name("FILE")
-                .multiple(true),
+                .allow_invalid_utf8(true)
+                .multiple_occurrences(true),
         )
         .group(
-            ArgGroup::with_name("files")
+            ArgGroup::new("files")
                 .multiple(true)
                 .required(true)
                 .args(&["tar", "part"]),
         )
-        .arg_from_usage("--no-verify 'don't verify the checksum of tar files'")
-        .arg_from_usage("--reboot 'reboot device after upload'")
+        .arg(
+            Arg::new("no-verify")
+                .long("no-verify")
+                .help("don't verify the checksum of tar files"),
+        )
+        .arg(
+            Arg::new("reboot")
+                .long("reboot")
+                .help("reboot device after upload"),
+        )
         .arg_select_device()
 }
 
-pub fn exec(args: &ArgMatches<'_>) -> CliResult {
+pub fn exec(args: &ArgMatches) -> CliResult {
     let files = get_arguments(args)?;
 
     if let Some(device) = args.selected_device()? {
@@ -117,7 +129,7 @@ pub fn exec(args: &ArgMatches<'_>) -> CliResult {
 }
 
 enum FileArgument<'a> {
-    File { name: &'a str, file: &'a Path },
+    File { name: Cow<'a, str>, file: &'a Path },
     Tar { file: &'a Path },
 }
 
@@ -138,24 +150,24 @@ impl<'a> FileArgument<'a> {
     }
 }
 
-fn get_arguments<'a>(args: &'a ArgMatches<'_>) -> Result<Vec<FileArgument<'a>>, Error> {
+fn get_arguments(args: &ArgMatches) -> Result<Vec<FileArgument<'_>>, Error> {
     fn chunked<T: Iterator>(mut iter: T) -> impl Iterator<Item = (T::Item, T::Item)> {
         std::iter::from_fn(move || iter.next().zip(iter.next()))
     }
 
     let mut files = vec![];
 
-    let partition_args = args.indices_of("part").zip(args.values_of("part"));
+    let partition_args = args.indices_of("part").zip(args.values_of_os("part"));
     if let Some((indices, values)) = partition_args {
         let indices = chunked(indices).map(|(i, _)| i);
         let values = chunked(values).map(|(name, file)| FileArgument::File {
-            name,
+            name: name.to_string_lossy(),
             file: Path::new(file),
         });
         files.extend(indices.zip(values));
     }
 
-    let tar_args = args.indices_of("tar").zip(args.values_of("tar"));
+    let tar_args = args.indices_of("tar").zip(args.values_of_os("tar"));
     if let Some((indices, values)) = tar_args {
         let values = values.map(|file| FileArgument::Tar {
             file: Path::new(file),

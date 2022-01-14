@@ -12,7 +12,7 @@ pub fn cli() -> App {
         .arg_select_device()
 }
 
-pub fn exec(args: &ArgMatches<'_>) -> CliResult {
+pub fn exec(args: &ArgMatches) -> CliResult {
     if let Some(device) = args.selected_device()? {
         let mut handle = device.open(Duration::from_secs(3))?;
         handle.claim()?;

@@ -8,13 +8,13 @@ mod reboot;
 use crate::device::{self, Device};
 use crate::error::{CliResult, Error};
 
-pub type App = clap::App<'static, 'static>;
+pub type App = clap::App<'static>;
 
 pub fn cli() -> Vec<App> {
     vec![detect::cli(), pit::cli(), flash::cli(), reboot::cli()]
 }
 
-pub fn get(cmd: &str) -> Option<fn(&ArgMatches<'_>) -> CliResult> {
+pub fn get(cmd: &str) -> Option<fn(&ArgMatches) -> CliResult> {
     let func = match cmd {
         "detect" => detect::exec,
         "pit" => pit::exec,
@@ -34,7 +34,7 @@ pub trait AppExt {
 impl AppExt for App {
     fn arg_usb_log_level(self) -> App {
         self.arg(
-            Arg::with_name("usb-log-level")
+            Arg::new("usb-log-level")
                 .long("usb-log-level")
                 .help("set the libusb log level")
                 .global(true)
@@ -46,19 +46,20 @@ impl AppExt for App {
 
     fn arg_select_device(self) -> App {
         self.arg(
-            Arg::from_usage("[device] -d <DEVICE>, --device")
+            Arg::new("device")
+                .long("device")
+                .short('d')
+                .value_name("DEVICE")
                 .help(r#"select a device via bus number and its address (ex: "003:068", "3:68")"#)
                 .validator(|s| match s.split_once(':') {
                     Some((bus_number, address)) => {
-                        bus_number
-                            .parse::<u8>()
-                            .map_err(|_| String::from("invalid bus number"))?;
+                        bus_number.parse::<u8>().map_err(|_| "invalid bus number")?;
                         address
                             .parse::<u8>()
-                            .map_err(|_| String::from("invalid device address"))?;
+                            .map_err(|_| "invalid device address")?;
                         Ok(())
                     }
-                    _ => Err(r#"invalid device selector. expected: "XXX:XXX""#.into()),
+                    _ => Err(r#"invalid device selector. expected: "XXX:XXX""#),
                 }),
         )
     }
@@ -70,7 +71,7 @@ pub trait ArgMatchesExt {
     fn selected_device(&self) -> Result<Option<Device>, Error>;
 }
 
-impl ArgMatchesExt for ArgMatches<'_> {
+impl ArgMatchesExt for ArgMatches {
     fn usb_log_level(&self) -> Option<rusb::LogLevel> {
         let level = match self.value_of("usb-log-level") {
             Some("error") => rusb::LogLevel::Error,

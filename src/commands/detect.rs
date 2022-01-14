@@ -7,7 +7,7 @@ pub fn cli() -> App {
     App::new("detect").about("list connected Samsung devices")
 }
 
-pub fn exec(args: &ArgMatches<'_>) -> CliResult {
+pub fn exec(args: &ArgMatches) -> CliResult {
     let log_level = args.usb_log_level();
     for device in device::detect(log_level)? {
         let (vendor_id, product_id) = device.id()?;

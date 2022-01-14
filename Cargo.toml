@@ -11,7 +11,7 @@ include = ["src/**/*", "LICENSE", "README.md"]
 [dependencies]
 bitflags = "1.2"
 byteorder = "1.2"
-clap = "2.33"
+clap = { version = "3.0.7", features = ["cargo"] }
 md-5 = "0.10"
 rusb = "0.9"
 tar = { version = "0.4.35", default-features = false }
