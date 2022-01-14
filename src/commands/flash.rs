@@ -4,10 +4,10 @@ use std::io::{self, BufReader, Cursor, Read, Seek, SeekFrom};
 use std::path::Path;
 use std::time::Duration;
 
-use clap::{Arg, ArgGroup, ArgMatches};
+use clap::{ArgGroup, ArgMatches};
 use md5::{Digest, Md5};
 
-use super::{App, AppExt, ArgMatchesExt, CliResult, Error};
+use super::{opt, path_opt, App, AppExt, ArgMatchesExt, CliResult, Error};
 use crate::pit::{BinaryType, Entry, Pit};
 use crate::proto::{self, FileTarget};
 
@@ -15,22 +15,16 @@ pub fn cli() -> App {
     App::new("flash")
         .about("flash partitions to a connected device")
         .arg(
-            Arg::new("part")
-                .help("partition name and file image")
-                .long("partition")
+            path_opt("part", "partition name and file image")
                 .short('p')
                 .value_names(&["NAME", "FILE"])
-                .allow_invalid_utf8(true)
                 .multiple_occurrences(true)
                 .multiple_values(true),
         )
         .arg(
-            Arg::new("tar")
-                .help("tar file containing the file images to be flashed")
-                .long("tar")
+            path_opt("tar", "tar file containing the file images to be flashed")
                 .short('t')
                 .value_name("FILE")
-                .allow_invalid_utf8(true)
                 .multiple_occurrences(true),
         )
         .group(
@@ -39,16 +33,8 @@ pub fn cli() -> App {
                 .required(true)
                 .args(&["tar", "part"]),
         )
-        .arg(
-            Arg::new("no-verify")
-                .long("no-verify")
-                .help("don't verify the checksum of tar files"),
-        )
-        .arg(
-            Arg::new("reboot")
-                .long("reboot")
-                .help("reboot device after upload"),
-        )
+        .arg(opt("no-verify", "don't verify the checksum of tar files"))
+        .arg(opt("reboot", "reboot device after upload"))
         .arg_select_device()
 }
 

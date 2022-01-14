@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use clap::{AppSettings, Arg, ArgMatches};
 
-use super::{App, AppExt, ArgMatchesExt, CliResult, Error};
+use super::{path_opt, App, AppExt, ArgMatchesExt, CliResult, Error};
 use crate::device::Handle;
 use crate::pit::Pit;
 use crate::proto;
@@ -17,12 +17,9 @@ pub fn cli() -> App {
             App::new("print")
                 .about("print the contents of the PIT from a connected device or a PIT file")
                 .arg(
-                    Arg::new("file")
-                        .long("file")
+                    path_opt("file", "read local PIT file")
                         .short('f')
-                        .value_name("FILE")
-                        .allow_invalid_utf8(true)
-                        .help("read local PIT file"),
+                        .value_name("FILE"),
                 )
                 .arg_select_device(),
         )

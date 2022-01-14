@@ -99,3 +99,12 @@ impl ArgMatchesExt for ArgMatches {
         Ok(device)
     }
 }
+
+pub fn opt(name: &'static str, help: &'static str) -> Arg<'static> {
+    Arg::new(name).long(name).help(help)
+}
+
+/// Allow invalid utf8 for path/file options
+pub fn path_opt(name: &'static str, help: &'static str) -> Arg<'static> {
+    opt(name, help).allow_invalid_utf8(true)
+}
