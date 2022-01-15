@@ -1,8 +1,11 @@
 # wuotan
 
-## Tested with
+## Compatibility
 
-- Samsung Galaxy S3 Neo (GT-I9301I)
+Wuotan was developed under Linux and successfully tested with a Samsung Galaxy S3 Neo (GT-I9301I).
+
+Currently, it doesn't work on Windows because it lacks some quirks that
+seem to be necessary to flash devices on Windows.
 
 ## Installation
 
