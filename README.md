@@ -18,17 +18,16 @@ $ cargo install https://github.com/nickelc/wuotan.git
 ### List connected Samsung devices
 ```
 $ wuotan help detect
-wuotan-detect 
+wuotan-detect
 list connected Samsung devices
 
 USAGE:
-    wuotan detect
-
-FLAGS:
-    -h, --help    Prints help information
+    wuotan detect [OPTIONS]
 
 OPTIONS:
-        --usb-log-level <LEVEL>    set the libusb log level [possible values: error, warn, info, debug]
+    -h, --help                     Print help information
+        --usb-log-level <LEVEL>    set the libusb log level [possible values: error, warn, info,
+                                   debug]
 ```
 
 #### Example
@@ -46,13 +45,13 @@ print the contents of the PIT from a connected device or a PIT file
 USAGE:
     wuotan pit print [OPTIONS]
 
-FLAGS:
-    -h, --help    Prints help information
-
 OPTIONS:
-    -d, --device <DEVICE>          select a device via bus number and its address (ex: "003:068", "3:68")
+    -d, --device <DEVICE>          select a device via bus number and its address (ex: "003:068",
+                                   "3:68")
     -f, --file <FILE>              read local PIT file
-        --usb-log-level <LEVEL>    set the libusb log level [possible values: error, warn, info, debug]
+    -h, --help                     Print help information
+        --usb-log-level <LEVEL>    set the libusb log level [possible values: error, warn, info,
+                                   debug]
 ```
 
 #### Example
@@ -116,21 +115,22 @@ FOTA Name:
 ### Flash partitions
 ```
 $ wuotan help flash
+wuotan-flash
 flash partitions to a connected device
 
 USAGE:
-    wuotan flash [FLAGS] [OPTIONS] <--tar <FILE>...|--partition <NAME> <FILE>>
-
-FLAGS:
-    -h, --help         Prints help information
-        --no-verify    don't verify the checksum of tar files
-        --reboot       reboot device after upload
+    wuotan flash [OPTIONS]
 
 OPTIONS:
-    -d, --device <DEVICE>            select a device via bus number and its address (ex: "003:068", "3:68")
-    -p, --partition <NAME> <FILE>    partition name and file image
-    -t, --tar <FILE>...              tar file containing the file images to be flashed
-        --usb-log-level <LEVEL>      set the libusb log level [possible values: error, warn, info, debug]
+    -d, --device <DEVICE>          select a device via bus number and its address (ex: "003:068",
+                                   "3:68")
+    -h, --help                     Print help information
+        --no-verify                don't verify the checksum of tar files
+    -p, --part <NAME> <FILE>       partition name and file image
+        --reboot                   reboot device after upload
+    -t, --tar <FILE>               tar file containing the file images to be flashed
+        --usb-log-level <LEVEL>    set the libusb log level [possible values: error, warn, info,
+                                   debug]
 ```
 
 #### Example: Flashing CF-Auto-Root
